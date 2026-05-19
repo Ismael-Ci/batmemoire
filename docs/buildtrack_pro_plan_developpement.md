@@ -87,7 +87,7 @@ Objectif : rendre l'application vraiment utile sur telephone pendant une visite 
 
 Fonctions a developper :
 
-- Module `Interventions`.
+- Module `Interventions` avec statut, technicien, cout, diagnostic et photos avant/apres.
 - Checklists d'inspection.
 - Photos avant/apres.
 - Statuts : a planifier, en cours, termine, valide.
@@ -200,8 +200,8 @@ Sprint 2 :
 
 Sprint 3 :
 
-- Module Interventions.
-- Photos avant/apres.
+- Enrichir le module Interventions deja ajoute au MVP.
+- Ajouter checklists d'inspection.
 - Rapport PDF intervention.
 
 Sprint 4 :

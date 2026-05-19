@@ -1,4 +1,4 @@
-const CACHE_NAME = "batimemoire-ci-mvp-v7";
+const CACHE_NAME = "batimemoire-ci-mvp-v8";
 const ASSETS = [
   "./",
   "./index.html",

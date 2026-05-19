@@ -7,6 +7,7 @@ const stateTemplate = {
   materials: [],
   equipment: [],
   documents: [],
+  interventions: [],
   reminders: [],
   notifications: [],
   catalog: [],
@@ -175,6 +176,40 @@ const moduleConfig = {
       { name: "date", label: "Date", type: "date" },
       { name: "fileName", label: "Fichier", type: "file" },
       { name: "status", label: "Statut", type: "select", options: ["Brouillon", "Validé", "À mettre à jour"] },
+      { name: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+  },
+  interventions: {
+    label: "Interventions",
+    singular: "intervention",
+    collection: "interventions",
+    idPrefix: "int",
+    columns: [
+      { key: "title", label: "Intervention", main: true, sub: "diagnosis" },
+      { key: "buildingId", label: "BÃ¢timent", relation: "building" },
+      { key: "zoneId", label: "Zone", relation: "zone" },
+      { key: "equipmentId", label: "Ã‰quipement", relation: "equipment" },
+      { key: "technician", label: "Technicien" },
+      { key: "scheduledAt", label: "Date", date: true },
+      { key: "cost", label: "CoÃ»t" },
+      { key: "status", label: "Statut", badge: true },
+    ],
+    fields: [
+      { name: "buildingId", label: "BÃ¢timent", type: "select", relation: "buildings", required: true },
+      { name: "zoneId", label: "Zone", type: "select", relation: "zones" },
+      { name: "equipmentId", label: "Ã‰quipement concernÃ©", type: "select", relation: "equipment" },
+      { name: "title", label: "Titre", type: "text", required: true },
+      { name: "type", label: "Type", type: "select", options: ["Inspection", "Maintenance prÃ©ventive", "Maintenance corrective", "RÃ©paration", "Audit", "Urgence"] },
+      { name: "technician", label: "Technicien / prestataire", type: "text" },
+      { name: "scheduledAt", label: "Date prÃ©vue", type: "date", required: true },
+      { name: "completedAt", label: "Date terminÃ©e", type: "date" },
+      { name: "status", label: "Statut", type: "select", options: ["Ã€ planifier", "PlanifiÃ©e", "En cours", "TerminÃ©e", "ValidÃ©e"] },
+      { name: "cost", label: "CoÃ»t estimÃ© / rÃ©el", type: "text" },
+      { name: "diagnosis", label: "Diagnostic", type: "textarea", full: true },
+      { name: "actionsDone", label: "Actions rÃ©alisÃ©es", type: "textarea", full: true },
+      { name: "photoBefore", label: "Photo avant", type: "file" },
+      { name: "photoAfter", label: "Photo aprÃ¨s", type: "file" },
+      { name: "clientSignature", label: "Signature client", type: "text" },
       { name: "notes", label: "Notes", type: "textarea", full: true },
     ],
   },
@@ -383,6 +418,11 @@ function seedState() {
       { id: "doc-clim", buildingId: "bat-marcory", zoneId: "zone-bloc-operatoire", type: "Fiche technique", title: "Fiche technique CTA bloc opératoire", date: "2025-09-05", fileName: "fiche-cta-daikin.pdf", status: "Validé", notes: "À conserver pour maintenance." },
       { id: "doc-yop", buildingId: "bat-yopougon", zoneId: "zone-stock", type: "Plan électricité", title: "Plan réseau sécurité incendie", date: "2026-03-16", fileName: "plan-incendie-yop-logistique.pdf", status: "Brouillon", notes: "Validation finale attendue." },
     ],
+    interventions: [
+      { id: "int-tgbt", buildingId: "bat-akwaba", zoneId: "zone-local", equipmentId: "eq-tableau", title: "Thermographie TGBT principal", type: "Maintenance prÃ©ventive", technician: "ElecPro Abidjan", scheduledAt: "2026-05-22", completedAt: "", status: "PlanifiÃ©e", cost: "180 000 FCFA", diagnosis: "ContrÃ´le prÃ©ventif aprÃ¨s alerte de serrage.", actionsDone: "", photoBefore: "", photoAfter: "", clientSignature: "", notes: "PrÃ©voir coupure partielle avec le gestionnaire." },
+      { id: "int-cta", buildingId: "bat-marcory", zoneId: "zone-bloc-operatoire", equipmentId: "eq-clim", title: "Remplacement filtres CTA", type: "Maintenance prÃ©ventive", technician: "Froid SantÃ© CI", scheduledAt: "2026-05-25", completedAt: "", status: "Ã€ planifier", cost: "95 000 FCFA", diagnosis: "Maintenance mensuelle bloc opÃ©ratoire.", actionsDone: "", photoBefore: "", photoAfter: "", clientSignature: "", notes: "Intervention hors horaires patients." },
+      { id: "int-incendie", buildingId: "bat-yopougon", zoneId: "zone-stock", equipmentId: "eq-incendie", title: "Test sirÃ¨ne et dÃ©tecteurs", type: "Inspection", technician: "SecureFire CI", scheduledAt: "2026-06-15", completedAt: "", status: "PlanifiÃ©e", cost: "120 000 FCFA", diagnosis: "ContrÃ´le trimestriel sÃ©curitÃ© incendie.", actionsDone: "", photoBefore: "", photoAfter: "", clientSignature: "", notes: "Informer l'Ã©quipe logistique avant test sonore." },
+    ],
     reminders: [
       { id: "rap-toiture", buildingId: "bat-akwaba", zoneId: "zone-toiture", type: "Inspection", title: "Inspection toiture terrasse", dueDate: "2026-06-15", recurrence: "Annuelle", priority: "Haute", assignee: "Kouamé N'Guessan", status: "Planifié", notes: "Contrôle évacuations et relevés d'étanchéité." },
       { id: "rap-tgbt", buildingId: "bat-akwaba", zoneId: "zone-local", type: "Maintenance", title: "Contrôle TGBT principal", dueDate: "2026-05-15", recurrence: "Semestrielle", priority: "Critique", assignee: "ElecPro Abidjan", status: "En retard", notes: "Thermographie et serrage." },
@@ -454,7 +494,7 @@ async function hydrateFromServer() {
 }
 
 async function loadServerState() {
-  appState = await apiJson("/state");
+  appState = { ...structuredClone(stateTemplate), ...(await apiJson("/state")) };
   appState.catalog = appState.catalog?.length ? appState.catalog : referenceCatalog();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
   renderBuildingFilter();
@@ -536,6 +576,10 @@ function buildingName(id) {
 
 function zoneName(id) {
   return appState.zones.find((item) => item.id === id)?.name || "-";
+}
+
+function equipmentName(id) {
+  return appState.equipment.find((item) => item.id === id)?.name || "-";
 }
 
 function activeBuildingId() {
@@ -626,6 +670,7 @@ function renderDashboard() {
     metric("Matériaux", count("materials"), "Références"),
     metric("Équipements", count("equipment"), "Actifs"),
     metric("Documents", count("documents"), "Dossier"),
+    metric("Interventions", count("interventions"), "Terrain"),
     metric("Alertes", overdue + soon, `${overdue} retard`),
   ].join("");
 
@@ -775,6 +820,14 @@ function renderModuleSummary(moduleKey, records) {
   if (moduleKey === "documents") {
     items.push(["Validés", records.filter((item) => item.status === "Validé").length]);
   }
+  if (moduleKey === "interventions") {
+    items = [
+      ["Total", records.length],
+      ["En cours", records.filter((item) => item.status === "En cours").length],
+      ["TerminÃ©es", records.filter((item) => ["TerminÃ©e", "ValidÃ©e"].includes(item.status)).length],
+      ["PlanifiÃ©es", records.filter((item) => item.status === "PlanifiÃ©e").length],
+    ];
+  }
   dom.moduleSummary.innerHTML = items
     .map(([label, value]) => `<div class="summary-pill"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`)
     .join("");
@@ -790,6 +843,7 @@ function renderRow(moduleKey, record) {
           ${moduleKey === "equipment" ? `<button type="button" data-qr="${record.id}">QR</button>` : ""}
           ${moduleKey === "reminders" ? `<button type="button" data-notify="${record.id}">Notifier</button>` : ""}
           ${moduleKey === "reminders" && record.status !== "Fait" ? `<button type="button" data-complete="${record.id}">Fait</button>` : ""}
+          ${moduleKey === "interventions" && !["TerminÃ©e", "ValidÃ©e"].includes(record.status) ? `<button type="button" data-complete-intervention="${record.id}">Terminer</button>` : ""}
           <button type="button" data-edit="${record.id}">Modifier</button>
           <button type="button" data-delete="${record.id}">Supprimer</button>
       `
@@ -810,6 +864,7 @@ function renderCell(record, column) {
   let value = record[column.key];
   if (column.relation === "building") value = buildingName(value);
   if (column.relation === "zone") value = zoneName(value);
+  if (column.relation === "equipment") value = equipmentName(value);
   if (column.date) value = formatDate(value);
   if (Array.isArray(value)) value = value.join(", ");
   if (column.badge) return statusBadge(value);
@@ -873,6 +928,10 @@ function selectOptions(field, value) {
     const zones = appState.zones.filter((zone) => !selectedBuildingScope() || zone.buildingId === selectedBuildingScope());
     return [`<option value="">Aucune zone</option>`, ...zones.map((zone) => option(zone.id, `${zone.name} · ${buildingName(zone.buildingId)}`, value))].join("");
   }
+  if (field.relation === "equipment") {
+    const equipment = appState.equipment.filter((item) => !selectedBuildingScope() || item.buildingId === selectedBuildingScope());
+    return [`<option value="">Aucun Ã©quipement</option>`, ...equipment.map((item) => option(item.id, `${item.name} Â· ${buildingName(item.buildingId)}`, value))].join("");
+  }
   return (field.options || []).map((item) => option(item, item, value)).join("");
 }
 
@@ -899,13 +958,19 @@ async function handleSubmit(event) {
     payload[field.name] = String(formData.get(field.name) || "").trim();
   });
 
-  const fileInput = dom.form.querySelector('input[type="file"][name="fileName"]');
-  if (fileInput?.files?.[0]) {
+  const fileFields = config.fields.filter((field) => field.type === "file");
+  for (const field of fileFields) {
+    const fileInput = dom.form.querySelector(`input[type="file"][name="${field.name}"]`);
+    if (!fileInput?.files?.[0]) continue;
     try {
       const uploaded = await uploadDocument(fileInput.files[0]);
-      payload.fileName = uploaded.fileName;
-      payload.fileUrl = uploaded.url;
-      payload.storedName = uploaded.storedName;
+      payload[field.name] = uploaded.fileName;
+      payload[`${field.name}Url`] = uploaded.url;
+      payload[`${field.name}StoredName`] = uploaded.storedName;
+      if (field.name === "fileName") {
+        payload.fileUrl = uploaded.url;
+        payload.storedName = uploaded.storedName;
+      }
     } catch (error) {
       showToast(error.message || "Upload impossible.");
       return;
@@ -978,7 +1043,7 @@ function deleteRecord(moduleKey, id) {
 
   if (moduleKey === "buildings") {
     appState.buildings = appState.buildings.filter((item) => item.id !== id);
-    ["zones", "materials", "equipment", "documents", "reminders"].forEach((collection) => {
+    ["zones", "materials", "equipment", "documents", "interventions", "reminders"].forEach((collection) => {
       appState[collection] = appState[collection].filter((item) => item.buildingId !== id);
     });
   } else {
@@ -1023,6 +1088,16 @@ function completeReminder(id) {
   saveState();
   setView("reminders");
   showToast("Rappel marqué comme fait.");
+}
+
+function completeIntervention(id) {
+  const today = new Date().toISOString().slice(0, 10);
+  appState.interventions = appState.interventions.map((item) =>
+    item.id === id ? { ...item, status: "TerminÃ©e", completedAt: item.completedAt || today, updatedAt: new Date().toISOString() } : item
+  );
+  saveState();
+  setView("interventions");
+  showToast("Intervention marquÃ©e comme terminÃ©e.");
 }
 
 function openEquipmentQr(id) {
@@ -1158,6 +1233,7 @@ function bindEvents() {
     const editId = event.target.closest("[data-edit]")?.dataset.edit;
     const deleteId = event.target.closest("[data-delete]")?.dataset.delete;
     const completeId = event.target.closest("[data-complete]")?.dataset.complete;
+    const completeInterventionId = event.target.closest("[data-complete-intervention]")?.dataset.completeIntervention;
     const qrId = event.target.closest("[data-qr]")?.dataset.qr;
     const notifyId = event.target.closest("[data-notify]")?.dataset.notify;
     const resetUserId = event.target.closest("[data-reset-user]")?.dataset.resetUser;
@@ -1168,6 +1244,7 @@ function bindEvents() {
     }
     if (deleteId) deleteRecord(currentView, deleteId);
     if (completeId) completeReminder(completeId);
+    if (completeInterventionId) completeIntervention(completeInterventionId);
     if (qrId) openEquipmentQr(qrId);
     if (notifyId) notifyReminder(notifyId);
     if (resetUserId) resetUserPassword(resetUserId);

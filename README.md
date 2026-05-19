@@ -30,6 +30,7 @@ Premiere version du carnet numerique du batiment pour le marche ivoirien. Le pro
 - Materiaux.
 - Equipements.
 - Documents.
+- Interventions terrain.
 - Rappels.
 - Notifications.
 - Bibliotheque materiaux/equipements.
