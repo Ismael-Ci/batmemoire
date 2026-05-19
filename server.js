@@ -19,6 +19,47 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+function referenceCatalog() {
+  return [
+    { id: "cat-ciment-cpj", family: "Structure", category: "Ciment", name: "Ciment Portland CPJ 32.5", brand: "LafargeHolcim / Cimaf / Sococim", reference: "CPJ-CEM-II-32.5", lifespan: "50 ans et plus selon ouvrage", maintenance: "Contrôle fissures annuel", usage: "Béton courant, mortier, maçonnerie", notes: "Vérifier conformité locale, stockage au sec et date de fabrication." },
+    { id: "cat-ciment-cpa", family: "Structure", category: "Ciment", name: "Ciment CPA 42.5", brand: "Cimaf / Dangote / LafargeHolcim", reference: "CPA-CEM-I-42.5", lifespan: "50 ans et plus selon ouvrage", maintenance: "Inspection structurelle périodique", usage: "Béton armé, poteaux, poutres, dalles", notes: "À utiliser selon calcul béton et dosage validé." },
+    { id: "cat-fer-ha", family: "Structure", category: "Acier", name: "Fer à béton haute adhérence", brand: "SOTACI / Turkish Steel / Import", reference: "HA-FE500-D8-D25", lifespan: "50 ans et plus si protégé", maintenance: "Surveillance corrosion et fissures", usage: "Armatures béton armé", notes: "Contrôler diamètre, nuance et certificats." },
+    { id: "cat-beton-pret", family: "Structure", category: "Béton", name: "Béton prêt à l'emploi", brand: "Centrale béton locale", reference: "BPE-C25/30", lifespan: "50 ans et plus", maintenance: "Inspection structure et humidité", usage: "Dalles, voiles, fondations", notes: "Conserver bons de livraison et formulation." },
+    { id: "cat-parpaing", family: "Maçonnerie", category: "Bloc", name: "Parpaing creux 15/20", brand: "Fabrication locale contrôlée", reference: "BLOC-15-20", lifespan: "30 à 50 ans", maintenance: "Contrôle fissures et humidité", usage: "Murs, cloisons, façades", notes: "Vérifier résistance et cure correcte." },
+    { id: "cat-brique", family: "Maçonnerie", category: "Brique", name: "Brique de terre cuite", brand: "Terre cuite locale / import", reference: "BTC-TC-10", lifespan: "50 ans et plus", maintenance: "Contrôle joints et remontées capillaires", usage: "Cloisons, murs, isolation thermique", notes: "Bonne inertie thermique." },
+    { id: "cat-membrane-sbs", family: "Toiture", category: "Étanchéité", name: "Membrane bitumineuse SBS 4 mm", brand: "Soprema / Sika / Derbigum", reference: "SBS-4MM-ALU", lifespan: "10 à 20 ans", maintenance: "Inspection annuelle et après fortes pluies", usage: "Toiture terrasse, relevés d'étanchéité", notes: "Prévoir protection contre poinçonnement et UV." },
+    { id: "cat-bac-acier", family: "Toiture", category: "Couverture", name: "Bac acier nervuré galvanisé", brand: "Metal Ivoire / ArcelorMittal / import", reference: "BAC75-Z275", lifespan: "15 à 30 ans", maintenance: "Contrôle fixations et corrosion annuel", usage: "Entrepôts, maisons, bâtiments industriels", notes: "Choisir épaisseur adaptée et traitement anticorrosion." },
+    { id: "cat-tuile", family: "Toiture", category: "Couverture", name: "Tuile béton ou terre cuite", brand: "Monier / Terreal / local", reference: "TUILE-TC-BETON", lifespan: "25 à 50 ans", maintenance: "Nettoyage mousse et contrôle casse", usage: "Maisons, villas, bâtiments résidentiels", notes: "Prévoir pente et écran sous toiture." },
+    { id: "cat-carrelage-gres", family: "Finition", category: "Carrelage", name: "Grès cérame 60x60", brand: "Marazzi / Porcelanosa / Ceramica Uno", reference: "GRES-6060-R10", lifespan: "15 à 30 ans", maintenance: "Nettoyage régulier, remplacement carreaux cassés", usage: "Sols intérieurs, halls, logements", notes: "Conserver une réserve de carreaux." },
+    { id: "cat-faience", family: "Finition", category: "Carrelage", name: "Faïence murale salle d'eau", brand: "RAK / Pamesa / import", reference: "FAIENCE-30X60", lifespan: "15 à 25 ans", maintenance: "Contrôle joints silicone et infiltration", usage: "Salles de bain, cuisines", notes: "Prévoir joints hydrofuges." },
+    { id: "cat-peinture-acryl", family: "Finition", category: "Peinture", name: "Peinture acrylique intérieure", brand: "Seigneurie / Astral / BatiColor", reference: "ACRYL-MAT-INT", lifespan: "3 à 7 ans", maintenance: "Reprise selon usure et humidité", usage: "Murs intérieurs", notes: "Choisir lessivable pour zones fréquentées." },
+    { id: "cat-peinture-facade", family: "Finition", category: "Peinture", name: "Peinture façade anti-UV", brand: "Seigneurie / Sika / Astral", reference: "FACADE-UV-EXT", lifespan: "5 à 10 ans", maintenance: "Contrôle fissures et farinage annuel", usage: "Façades extérieures", notes: "Préparation support indispensable." },
+    { id: "cat-pvc-pression", family: "Plomberie", category: "Tube", name: "Tube PVC pression", brand: "Nicoll / Girpi / local", reference: "PVC-PN16-D20-D63", lifespan: "20 à 40 ans", maintenance: "Contrôle fuites et pression", usage: "Eau froide, alimentation", notes: "Respecter pression nominale et colle compatible." },
+    { id: "cat-ppr", family: "Plomberie", category: "Tube", name: "Tube PPR eau chaude/froide", brand: "Aquatherm / Vesbo / Kalde", reference: "PPR-PN20", lifespan: "25 à 50 ans", maintenance: "Contrôle soudures et dilatation", usage: "Réseaux sanitaires", notes: "Soudure thermique par technicien qualifié." },
+    { id: "cat-pex", family: "Plomberie", category: "Tube", name: "Tube multicouche PEX/Alu", brand: "Uponor / Comap / Henco", reference: "PEX-AL-PEX", lifespan: "25 à 50 ans", maintenance: "Contrôle raccords et nourrices", usage: "Eau sanitaire, chauffage", notes: "Éviter exposition UV directe." },
+    { id: "cat-wc", family: "Sanitaire", category: "Équipement", name: "WC suspendu ou monobloc", brand: "Roca / Jacob Delafon / Ideal Standard", reference: "WC-CERAM-STD", lifespan: "10 à 25 ans", maintenance: "Contrôle chasse, joints, fixations", usage: "Sanitaires logements et ERP", notes: "Conserver référence mécanisme chasse." },
+    { id: "cat-lavabo", family: "Sanitaire", category: "Équipement", name: "Lavabo céramique", brand: "Roca / Ideal Standard / local", reference: "LAV-CERAM-60", lifespan: "10 à 25 ans", maintenance: "Contrôle siphon, robinetterie, fissures", usage: "Salles d'eau", notes: "Prévoir accès siphon." },
+    { id: "cat-cable-u1000", family: "Électricité", category: "Câble", name: "Câble U1000 R2V", brand: "Nexans / Prysmian / Sycabel", reference: "U1000-R2V-3G2.5", lifespan: "25 à 40 ans", maintenance: "Contrôle échauffement et isolement", usage: "Alimentation circuits électriques", notes: "Dimensionner selon norme et puissance." },
+    { id: "cat-disjoncteur", family: "Électricité", category: "Protection", name: "Disjoncteur modulaire", brand: "Schneider / Legrand / Hager", reference: "MCB-C16-C32", lifespan: "10 à 25 ans", maintenance: "Test et serrage annuel", usage: "Protection circuits", notes: "Adapter courbe et calibre." },
+    { id: "cat-differentiel", family: "Électricité", category: "Protection", name: "Interrupteur différentiel 30 mA", brand: "Schneider / Legrand / Hager", reference: "RCD-30MA-40A", lifespan: "10 à 20 ans", maintenance: "Test mensuel recommandé", usage: "Protection personnes", notes: "Obligatoire sur circuits sensibles." },
+    { id: "cat-led-panel", family: "Électricité", category: "Éclairage", name: "Panneau LED encastré", brand: "Philips / Osram / Opple", reference: "LED-PANEL-600-40W", lifespan: "5 à 10 ans", maintenance: "Nettoyage et remplacement driver", usage: "Bureaux, cliniques, commerces", notes: "Choisir température couleur adaptée." },
+    { id: "cat-split", family: "Climatisation", category: "Climatiseur", name: "Split mural inverter", brand: "Daikin / LG / Samsung / Midea", reference: "SPLIT-INV-12000BTU", lifespan: "8 à 15 ans", maintenance: "Nettoyage filtres mensuel, entretien semestriel", usage: "Chambres, bureaux, petits locaux", notes: "Dimensionner selon volume et exposition." },
+    { id: "cat-vrv", family: "Climatisation", category: "Système centralisé", name: "VRV/VRF multi-zones", brand: "Daikin / Mitsubishi / LG", reference: "VRF-MULTI-ZONE", lifespan: "10 à 20 ans", maintenance: "Contrôle trimestriel, fluide, compresseur", usage: "Immeubles, hôtels, cliniques", notes: "Contrat maintenance recommandé." },
+    { id: "cat-pompe", family: "Hydraulique", category: "Pompe", name: "Pompe surpresseur", brand: "Grundfos / Wilo / Pedrollo", reference: "BOOSTER-2P-INOX", lifespan: "8 à 15 ans", maintenance: "Contrôle pression, joints, roulements semestriel", usage: "Alimentation eau immeuble", notes: "Prévoir pompe de secours pour sites critiques." },
+    { id: "cat-reservoir", family: "Hydraulique", category: "Réservoir", name: "Réservoir polyéthylène", brand: "Rototec / Polytank / local", reference: "PEHD-5000L", lifespan: "10 à 25 ans", maintenance: "Nettoyage semestriel, contrôle couvercle", usage: "Stockage eau", notes: "Protéger du soleil direct si nécessaire." },
+    { id: "cat-ascenseur", family: "Transport vertical", category: "Ascenseur", name: "Ascenseur passagers", brand: "Otis / Kone / Schindler / Orona", reference: "LIFT-630KG-8P", lifespan: "20 à 30 ans", maintenance: "Maintenance mensuelle obligatoire", usage: "Immeubles R+ et ERP", notes: "Contrat spécialisé obligatoire." },
+    { id: "cat-extincteur", family: "Sécurité", category: "Incendie", name: "Extincteur poudre ABC 6 kg", brand: "Sicli / Desautel / local certifié", reference: "EXT-ABC-6KG", lifespan: "10 à 20 ans", maintenance: "Contrôle annuel, recharge selon usage", usage: "Sécurité incendie", notes: "Afficher emplacement et date contrôle." },
+    { id: "cat-detecteur", family: "Sécurité", category: "Incendie", name: "Détecteur fumée adressable", brand: "Siemens / Honeywell / Bosch", reference: "FIRE-SMOKE-ADDR", lifespan: "8 à 12 ans", maintenance: "Test trimestriel", usage: "ERP, hôtels, cliniques, entrepôts", notes: "Relier à centrale incendie." },
+    { id: "cat-camera", family: "Sécurité", category: "CCTV", name: "Caméra IP PoE", brand: "Hikvision / Dahua / Axis", reference: "IP-CAM-4MP-POE", lifespan: "5 à 10 ans", maintenance: "Nettoyage optique et test enregistrement", usage: "Surveillance bâtiment", notes: "Prévoir politique de confidentialité." },
+    { id: "cat-controle-acces", family: "Sécurité", category: "Contrôle accès", name: "Lecteur badge RFID", brand: "ZKTeco / HID / Suprema", reference: "RFID-ACCESS-13.56", lifespan: "5 à 10 ans", maintenance: "Test badges et alimentation", usage: "Portes, locaux techniques", notes: "Prévoir procédure perte badge." },
+    { id: "cat-menuiserie-alu", family: "Menuiserie", category: "Aluminium", name: "Fenêtre aluminium coulissante", brand: "Technal / Profils locaux", reference: "ALU-COUL-2V", lifespan: "20 à 35 ans", maintenance: "Nettoyage rails, joints, roulettes annuel", usage: "Façades, appartements, bureaux", notes: "Vérifier étanchéité à l'eau." },
+    { id: "cat-porte-bois", family: "Menuiserie", category: "Bois", name: "Porte bois intérieure", brand: "Menuiserie locale / import", reference: "DOOR-WOOD-2040", lifespan: "10 à 25 ans", maintenance: "Contrôle paumelles, serrure, humidité", usage: "Pièces intérieures", notes: "Traitement anti-termites recommandé." },
+    { id: "cat-vitrage", family: "Façade", category: "Vitrage", name: "Double vitrage clair", brand: "Saint-Gobain / Guardian", reference: "DV-6-12-6", lifespan: "20 à 30 ans", maintenance: "Contrôle joints et buée interne", usage: "Fenêtres, façades vitrées", notes: "Choisir contrôle solaire si exposition forte." },
+    { id: "cat-groupe", family: "Énergie", category: "Groupe électrogène", name: "Groupe électrogène diesel", brand: "Perkins / Cummins / SDMO", reference: "GENSET-100KVA", lifespan: "10 à 20 ans", maintenance: "Essai mensuel, vidange, filtres", usage: "Secours énergie", notes: "Prévoir carburant, ventilation et insonorisation." },
+    { id: "cat-onduleur", family: "Énergie", category: "Onduleur", name: "Onduleur UPS online", brand: "APC / Eaton / Socomec", reference: "UPS-ONLINE-10KVA", lifespan: "5 à 12 ans", maintenance: "Test batteries semestriel", usage: "Informatique, clinique, sécurité", notes: "Batteries à remplacer tous les 3 à 5 ans." },
+  ];
+}
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
@@ -94,6 +135,7 @@ function seedState() {
       { id: "rap-clim", buildingId: "bat-marcory", zoneId: "zone-bloc-operatoire", type: "Maintenance", title: "Maintenance CTA bloc opératoire", dueDate: "2026-05-25", recurrence: "Mensuelle", priority: "Critique", assignee: "Froid Santé CI", status: "À faire", notes: "Filtres et température." },
     ],
     notifications: [],
+    catalog: referenceCatalog(),
   };
 }
 
@@ -190,6 +232,28 @@ function publicUser(user, account) {
   };
 }
 
+function requireAdmin(req, res, next) {
+  if (req.user.role !== "admin") return res.status(403).json({ error: "Accès admin requis" });
+  next();
+}
+
+function userForClient(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    status: user.status || "Actif",
+    createdAt: user.createdAt || "",
+    invitedAt: user.invitedAt || "",
+    lastResetAt: user.lastResetAt || "",
+  };
+}
+
+function temporaryPassword() {
+  return `Bati-${crypto.randomBytes(3).toString("hex")}-CI!`;
+}
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, publicUrl: PUBLIC_URL });
 });
@@ -229,19 +293,100 @@ app.get("/api/me", requireAuth, (req, res) => {
 });
 
 app.get("/api/state", requireAuth, (req, res) => {
-  res.json(req.account.state);
+  const state = { ...req.account.state };
+  state.catalog = state.catalog?.length ? state.catalog : referenceCatalog();
+  res.json(state);
 });
 
 app.put("/api/state", requireAuth, (req, res) => {
+  if (req.user.role === "lecteur") return res.status(403).json({ error: "Compte en lecture seule" });
   const db = req.db;
   const account = db.accounts.find((item) => item.id === req.account.id);
-  account.state = { ...seedState(), ...req.body, notifications: req.body.notifications || account.state.notifications || [] };
+  account.state = {
+    ...seedState(),
+    ...req.body,
+    notifications: req.body.notifications || account.state.notifications || [],
+    catalog: req.body.catalog?.length ? req.body.catalog : account.state.catalog?.length ? account.state.catalog : referenceCatalog(),
+  };
   account.updatedAt = new Date().toISOString();
   writeDb(db);
   res.json({ ok: true });
 });
 
+app.get("/api/users", requireAuth, requireAdmin, (req, res) => {
+  const users = req.db.users.filter((user) => user.accountId === req.account.id).map(userForClient);
+  res.json({ users });
+});
+
+app.post("/api/users", requireAuth, requireAdmin, async (req, res) => {
+  const { name, email, role } = req.body || {};
+  if (!name || !email) return res.status(400).json({ error: "Nom et email requis" });
+  const db = req.db;
+  const exists = db.users.some((user) => user.email.toLowerCase() === String(email).toLowerCase());
+  if (exists) return res.status(409).json({ error: "Cet email existe déjà" });
+  const password = temporaryPassword();
+  const user = {
+    id: `usr-${Date.now().toString(36)}`,
+    accountId: req.account.id,
+    name,
+    email,
+    role: ["admin", "gestionnaire", "technicien", "lecteur"].includes(role) ? role : "lecteur",
+    status: "Invité",
+    passwordHash: hashPassword(password),
+    createdAt: new Date().toISOString(),
+    invitedAt: new Date().toISOString(),
+  };
+  db.users.push(user);
+  writeDb(db);
+  await sendEmail(
+    { title: "Invitation BatiMemoire CI", message: `Bonjour ${name}, votre accès BatiMemoire CI est créé. Email: ${email}. Mot de passe temporaire: ${password}` },
+    email
+  );
+  res.json({ user: userForClient(user), temporaryPassword: password });
+});
+
+app.put("/api/users/:id", requireAuth, requireAdmin, (req, res) => {
+  const db = req.db;
+  const user = db.users.find((item) => item.id === req.params.id && item.accountId === req.account.id);
+  if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
+  const { name, role, status } = req.body || {};
+  if (name) user.name = name;
+  if (["admin", "gestionnaire", "technicien", "lecteur"].includes(role)) user.role = role;
+  if (["Actif", "Invité", "Suspendu"].includes(status)) user.status = status;
+  user.updatedAt = new Date().toISOString();
+  writeDb(db);
+  res.json({ user: userForClient(user) });
+});
+
+app.post("/api/users/:id/reset-password", requireAuth, requireAdmin, async (req, res) => {
+  const db = req.db;
+  const user = db.users.find((item) => item.id === req.params.id && item.accountId === req.account.id);
+  if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
+  const password = temporaryPassword();
+  user.passwordHash = hashPassword(password);
+  user.status = "Invité";
+  user.lastResetAt = new Date().toISOString();
+  writeDb(db);
+  await sendEmail(
+    { title: "Réinitialisation BatiMemoire CI", message: `Bonjour ${user.name}, votre nouveau mot de passe temporaire est: ${password}` },
+    user.email
+  );
+  res.json({ user: userForClient(user), temporaryPassword: password });
+});
+
+app.delete("/api/users/:id", requireAuth, requireAdmin, (req, res) => {
+  if (req.params.id === req.user.id) return res.status(400).json({ error: "Impossible de supprimer votre propre compte" });
+  const db = req.db;
+  const before = db.users.length;
+  db.users = db.users.filter((item) => !(item.id === req.params.id && item.accountId === req.account.id));
+  if (db.users.length === before) return res.status(404).json({ error: "Utilisateur introuvable" });
+  db.sessions = db.sessions.filter((session) => session.userId !== req.params.id);
+  writeDb(db);
+  res.json({ ok: true });
+});
+
 app.post("/api/upload", requireAuth, upload.single("document"), (req, res) => {
+  if (req.user.role === "lecteur") return res.status(403).json({ error: "Compte en lecture seule" });
   if (!req.file) return res.status(400).json({ error: "Aucun fichier reçu" });
   res.json({
     fileName: req.file.originalname,

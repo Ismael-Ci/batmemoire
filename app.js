@@ -9,7 +9,35 @@ const stateTemplate = {
   documents: [],
   reminders: [],
   notifications: [],
+  catalog: [],
 };
+
+function referenceCatalog() {
+  return [
+    { id: "cat-ciment-cpj", family: "Structure", category: "Ciment", name: "Ciment Portland CPJ 32.5", brand: "LafargeHolcim / Cimaf / Sococim", reference: "CPJ-CEM-II-32.5", lifespan: "50 ans et plus", maintenance: "Contrôle fissures annuel", usage: "Béton courant, mortier, maçonnerie", notes: "Stockage au sec, vérifier date fabrication." },
+    { id: "cat-ciment-cpa", family: "Structure", category: "Ciment", name: "Ciment CPA 42.5", brand: "Cimaf / Dangote / LafargeHolcim", reference: "CPA-CEM-I-42.5", lifespan: "50 ans et plus", maintenance: "Inspection structurelle", usage: "Béton armé, poteaux, dalles", notes: "Dosage validé par calcul béton." },
+    { id: "cat-fer-ha", family: "Structure", category: "Acier", name: "Fer à béton haute adhérence", brand: "SOTACI / Turkish Steel / Import", reference: "HA-FE500-D8-D25", lifespan: "50 ans et plus", maintenance: "Surveillance corrosion", usage: "Armatures béton armé", notes: "Contrôler diamètre et certificats." },
+    { id: "cat-parpaing", family: "Maçonnerie", category: "Bloc", name: "Parpaing creux 15/20", brand: "Fabrication locale contrôlée", reference: "BLOC-15-20", lifespan: "30 à 50 ans", maintenance: "Contrôle fissures et humidité", usage: "Murs et cloisons", notes: "Vérifier résistance et cure." },
+    { id: "cat-membrane-sbs", family: "Toiture", category: "Étanchéité", name: "Membrane bitumineuse SBS 4 mm", brand: "Soprema / Sika / Derbigum", reference: "SBS-4MM-ALU", lifespan: "10 à 20 ans", maintenance: "Inspection annuelle", usage: "Toiture terrasse", notes: "Protéger contre UV et poinçonnement." },
+    { id: "cat-bac-acier", family: "Toiture", category: "Couverture", name: "Bac acier nervuré galvanisé", brand: "Metal Ivoire / ArcelorMittal", reference: "BAC75-Z275", lifespan: "15 à 30 ans", maintenance: "Contrôle fixations et corrosion", usage: "Entrepôts, maisons, bâtiments industriels", notes: "Choisir épaisseur adaptée." },
+    { id: "cat-carrelage-gres", family: "Finition", category: "Carrelage", name: "Grès cérame 60x60", brand: "Marazzi / Porcelanosa / RAK", reference: "GRES-6060-R10", lifespan: "15 à 30 ans", maintenance: "Nettoyage, remplacement casse", usage: "Sols intérieurs, halls", notes: "Conserver réserve de carreaux." },
+    { id: "cat-peinture-acryl", family: "Finition", category: "Peinture", name: "Peinture acrylique intérieure", brand: "Seigneurie / Astral / BatiColor", reference: "ACRYL-MAT-INT", lifespan: "3 à 7 ans", maintenance: "Reprise selon usure", usage: "Murs intérieurs", notes: "Lessivable pour zones fréquentées." },
+    { id: "cat-pvc-pression", family: "Plomberie", category: "Tube", name: "Tube PVC pression", brand: "Nicoll / Girpi / local", reference: "PVC-PN16-D20-D63", lifespan: "20 à 40 ans", maintenance: "Contrôle fuites et pression", usage: "Eau froide, alimentation", notes: "Respecter pression nominale." },
+    { id: "cat-ppr", family: "Plomberie", category: "Tube", name: "Tube PPR eau chaude/froide", brand: "Aquatherm / Vesbo / Kalde", reference: "PPR-PN20", lifespan: "25 à 50 ans", maintenance: "Contrôle soudures", usage: "Réseaux sanitaires", notes: "Soudure thermique qualifiée." },
+    { id: "cat-cable-u1000", family: "Électricité", category: "Câble", name: "Câble U1000 R2V", brand: "Nexans / Prysmian / Sycabel", reference: "U1000-R2V-3G2.5", lifespan: "25 à 40 ans", maintenance: "Contrôle échauffement", usage: "Circuits électriques", notes: "Dimensionner selon puissance." },
+    { id: "cat-disjoncteur", family: "Électricité", category: "Protection", name: "Disjoncteur modulaire", brand: "Schneider / Legrand / Hager", reference: "MCB-C16-C32", lifespan: "10 à 25 ans", maintenance: "Test et serrage annuel", usage: "Protection circuits", notes: "Adapter courbe et calibre." },
+    { id: "cat-split", family: "Climatisation", category: "Climatiseur", name: "Split mural inverter", brand: "Daikin / LG / Samsung / Midea", reference: "SPLIT-INV-12000BTU", lifespan: "8 à 15 ans", maintenance: "Filtres mensuels, entretien semestriel", usage: "Chambres, bureaux", notes: "Dimensionner selon volume." },
+    { id: "cat-vrv", family: "Climatisation", category: "Système centralisé", name: "VRV/VRF multi-zones", brand: "Daikin / Mitsubishi / LG", reference: "VRF-MULTI-ZONE", lifespan: "10 à 20 ans", maintenance: "Contrôle trimestriel", usage: "Immeubles, hôtels, cliniques", notes: "Contrat maintenance recommandé." },
+    { id: "cat-pompe", family: "Hydraulique", category: "Pompe", name: "Pompe surpresseur", brand: "Grundfos / Wilo / Pedrollo", reference: "BOOSTER-2P-INOX", lifespan: "8 à 15 ans", maintenance: "Contrôle pression semestriel", usage: "Alimentation eau immeuble", notes: "Prévoir pompe secours." },
+    { id: "cat-ascenseur", family: "Transport vertical", category: "Ascenseur", name: "Ascenseur passagers", brand: "Otis / Kone / Schindler / Orona", reference: "LIFT-630KG-8P", lifespan: "20 à 30 ans", maintenance: "Maintenance mensuelle", usage: "Immeubles R+ et ERP", notes: "Contrat spécialisé obligatoire." },
+    { id: "cat-extincteur", family: "Sécurité", category: "Incendie", name: "Extincteur poudre ABC 6 kg", brand: "Sicli / Desautel / local certifié", reference: "EXT-ABC-6KG", lifespan: "10 à 20 ans", maintenance: "Contrôle annuel", usage: "Sécurité incendie", notes: "Afficher date contrôle." },
+    { id: "cat-detecteur", family: "Sécurité", category: "Incendie", name: "Détecteur fumée adressable", brand: "Siemens / Honeywell / Bosch", reference: "FIRE-SMOKE-ADDR", lifespan: "8 à 12 ans", maintenance: "Test trimestriel", usage: "ERP, hôtels, cliniques", notes: "Relier à centrale incendie." },
+    { id: "cat-camera", family: "Sécurité", category: "CCTV", name: "Caméra IP PoE", brand: "Hikvision / Dahua / Axis", reference: "IP-CAM-4MP-POE", lifespan: "5 à 10 ans", maintenance: "Nettoyage optique", usage: "Surveillance bâtiment", notes: "Prévoir politique confidentialité." },
+    { id: "cat-menuiserie-alu", family: "Menuiserie", category: "Aluminium", name: "Fenêtre aluminium coulissante", brand: "Technal / Profils locaux", reference: "ALU-COUL-2V", lifespan: "20 à 35 ans", maintenance: "Nettoyage rails annuel", usage: "Façades, appartements", notes: "Vérifier étanchéité eau." },
+    { id: "cat-groupe", family: "Énergie", category: "Groupe électrogène", name: "Groupe électrogène diesel", brand: "Perkins / Cummins / SDMO", reference: "GENSET-100KVA", lifespan: "10 à 20 ans", maintenance: "Essai mensuel, vidange", usage: "Secours énergie", notes: "Ventilation et insonorisation." },
+    { id: "cat-onduleur", family: "Énergie", category: "Onduleur", name: "Onduleur UPS online", brand: "APC / Eaton / Socomec", reference: "UPS-ONLINE-10KVA", lifespan: "5 à 12 ans", maintenance: "Test batteries semestriel", usage: "Informatique, clinique, sécurité", notes: "Batteries 3 à 5 ans." },
+  ];
+}
 
 const moduleConfig = {
   buildings: {
@@ -192,6 +220,51 @@ const moduleConfig = {
     ],
     fields: [],
   },
+  catalog: {
+    label: "Bibliothèque",
+    singular: "référence",
+    collection: "catalog",
+    idPrefix: "cat",
+    columns: [
+      { key: "name", label: "Matériel / équipement", main: true, sub: "reference" },
+      { key: "family", label: "Famille" },
+      { key: "category", label: "Catégorie" },
+      { key: "brand", label: "Marques" },
+      { key: "lifespan", label: "Durée de vie" },
+      { key: "maintenance", label: "Maintenance" },
+      { key: "usage", label: "Usage" },
+    ],
+    fields: [
+      { name: "family", label: "Famille", type: "text", required: true },
+      { name: "category", label: "Catégorie", type: "text", required: true },
+      { name: "name", label: "Nom", type: "text", required: true },
+      { name: "brand", label: "Marques", type: "text" },
+      { name: "reference", label: "Référence", type: "text" },
+      { name: "lifespan", label: "Durée de vie", type: "text" },
+      { name: "maintenance", label: "Maintenance recommandée", type: "text", full: true },
+      { name: "usage", label: "Usage", type: "text", full: true },
+      { name: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+  },
+  users: {
+    label: "Utilisateurs",
+    singular: "utilisateur",
+    collection: "users",
+    idPrefix: "usr",
+    columns: [
+      { key: "name", label: "Utilisateur", main: true, sub: "email" },
+      { key: "role", label: "Rôle", badge: true },
+      { key: "status", label: "Statut", badge: true },
+      { key: "createdAt", label: "Créé le", date: true },
+      { key: "lastResetAt", label: "Dernier reset", date: true },
+    ],
+    fields: [
+      { name: "name", label: "Nom complet", type: "text", required: true },
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "role", label: "Rôle", type: "select", options: ["admin", "gestionnaire", "technicien", "lecteur"] },
+      { name: "status", label: "Statut", type: "select", options: ["Actif", "Invité", "Suspendu"] },
+    ],
+  },
 };
 
 let appState = loadState();
@@ -199,6 +272,7 @@ let currentView = "dashboard";
 let currentEdit = null;
 let serverMode = false;
 let currentUser = null;
+let currentUsers = [];
 
 const dom = {
   viewTitle: document.querySelector("#viewTitle"),
@@ -316,6 +390,8 @@ function seedState() {
       { id: "rap-incendie", buildingId: "bat-yopougon", zoneId: "zone-stock", type: "Contrôle sécurité", title: "Test centrale incendie", dueDate: "2026-06-15", recurrence: "Trimestrielle", priority: "Haute", assignee: "SecureFire CI", status: "Planifié", notes: "Test sirène et capteurs." },
       { id: "rap-carrelage", buildingId: "bat-akwaba", zoneId: "zone-a301", type: "Garantie", title: "Vérifier réserve carrelage A301", dueDate: "2026-09-10", recurrence: "Une fois", priority: "Normale", assignee: "Kouamé N'Guessan", status: "À faire", notes: "Confirmer stockage des cartons de réserve." },
     ],
+    notifications: [],
+    catalog: referenceCatalog(),
   };
 }
 
@@ -324,7 +400,9 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return seedState();
     const parsed = JSON.parse(raw);
-    return { ...structuredClone(stateTemplate), ...parsed };
+    const state = { ...structuredClone(stateTemplate), ...parsed };
+    state.catalog = state.catalog?.length ? state.catalog : referenceCatalog();
+    return state;
   } catch {
     return seedState();
   }
@@ -377,9 +455,16 @@ async function hydrateFromServer() {
 
 async function loadServerState() {
   appState = await apiJson("/state");
+  appState.catalog = appState.catalog?.length ? appState.catalog : referenceCatalog();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
   renderBuildingFilter();
   setView(currentView);
+}
+
+async function loadUsers() {
+  if (!serverMode || currentUser?.role !== "admin") return;
+  const result = await apiJson("/users");
+  currentUsers = result.users || [];
 }
 
 function showAppSession() {
@@ -388,6 +473,7 @@ function showAppSession() {
   dom.userChip.hidden = false;
   dom.userCompany.textContent = currentUser?.company || "Entreprise";
   dom.userName.textContent = currentUser?.name || currentUser?.email || "Utilisateur";
+  if (currentUser?.role === "admin") loadUsers();
   window.setTimeout(handleEquipmentDeepLink, 100);
 }
 
@@ -464,6 +550,8 @@ function selectedBuildingScope() {
 }
 
 function scopedRecords(collection) {
+  if (collection === "users") return currentUsers;
+  if (collection === "catalog") return appState.catalog || [];
   const records = appState[collection] || [];
   const scope = selectedBuildingScope();
   if (!scope || collection === "buildings") {
@@ -516,6 +604,9 @@ function setView(view) {
   dom.dashboardView.classList.remove("is-active");
   dom.moduleView.classList.add("is-active");
   dom.viewTitle.textContent = moduleConfig[view].label;
+  if (view === "users" && serverMode && currentUser?.role === "admin") {
+    loadUsers().then(() => renderModule(view)).catch((error) => showToast(error.message || "Chargement utilisateurs impossible."));
+  }
   renderModule(view);
 }
 
@@ -674,6 +765,7 @@ function renderRow(moduleKey, record) {
   const cells = config.columns.map((column) => `<td>${renderCell(record, column)}</td>`).join("");
   const actions = config.fields.length
     ? `
+          ${moduleKey === "users" ? `<button type="button" data-reset-user="${record.id}">Reset</button>` : ""}
           ${moduleKey === "equipment" ? `<button type="button" data-qr="${record.id}">QR</button>` : ""}
           ${moduleKey === "reminders" ? `<button type="button" data-notify="${record.id}">Notifier</button>` : ""}
           ${moduleKey === "reminders" && record.status !== "Fait" ? `<button type="button" data-complete="${record.id}">Fait</button>` : ""}
@@ -771,6 +863,10 @@ async function handleSubmit(event) {
   event.preventDefault();
   const { moduleKey, id } = currentEdit;
   const config = moduleConfig[moduleKey];
+  if (moduleKey === "users") {
+    await saveUserFromForm(id);
+    return;
+  }
   const formData = new FormData(dom.form);
   const payload = {};
   config.fields.forEach((field) => {
@@ -809,6 +905,32 @@ async function handleSubmit(event) {
   setView(moduleKey);
 }
 
+async function saveUserFromForm(id) {
+  const formData = new FormData(dom.form);
+  const payload = {
+    name: String(formData.get("name") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    role: String(formData.get("role") || "lecteur").trim(),
+    status: String(formData.get("status") || "Actif").trim(),
+  };
+  try {
+    const result = await apiJson(id ? `/users/${encodeURIComponent(id)}` : "/users", {
+      method: id ? "PUT" : "POST",
+      body: JSON.stringify(payload),
+    });
+    await loadUsers();
+    dom.dialog.close();
+    setView("users");
+    if (result.temporaryPassword) {
+      showToast(`Utilisateur créé. Mot de passe temporaire : ${result.temporaryPassword}`);
+    } else {
+      showToast("Utilisateur modifié.");
+    }
+  } catch (error) {
+    showToast(error.message || "Action utilisateur impossible.");
+  }
+}
+
 async function uploadDocument(file) {
   if (!serverMode || !currentUser) {
     return { fileName: file.name, url: "", storedName: "" };
@@ -825,6 +947,10 @@ async function uploadDocument(file) {
 
 function deleteRecord(moduleKey, id) {
   const config = moduleConfig[moduleKey];
+  if (moduleKey === "users") {
+    deleteUser(id);
+    return;
+  }
   const record = appState[config.collection].find((item) => item.id === id);
   if (!record) return;
   if (!confirm(`Supprimer "${record.name || record.title}" ?`)) return;
@@ -841,6 +967,34 @@ function deleteRecord(moduleKey, id) {
   renderBuildingFilter();
   setView(moduleKey);
   showToast(`${config.singular} supprimé.`);
+}
+
+async function deleteUser(id) {
+  const record = currentUsers.find((item) => item.id === id);
+  if (!record) return;
+  if (!confirm(`Supprimer l'utilisateur "${record.name}" ?`)) return;
+  try {
+    await apiJson(`/users/${encodeURIComponent(id)}`, { method: "DELETE" });
+    await loadUsers();
+    setView("users");
+    showToast("Utilisateur supprimé.");
+  } catch (error) {
+    showToast(error.message || "Suppression impossible.");
+  }
+}
+
+async function resetUserPassword(id) {
+  const record = currentUsers.find((item) => item.id === id);
+  if (!record) return;
+  if (!confirm(`Réinitialiser le mot de passe de "${record.name}" ?`)) return;
+  try {
+    const result = await apiJson(`/users/${encodeURIComponent(id)}/reset-password`, { method: "POST", body: "{}" });
+    await loadUsers();
+    setView("users");
+    showToast(`Nouveau mot de passe temporaire : ${result.temporaryPassword}`);
+  } catch (error) {
+    showToast(error.message || "Réinitialisation impossible.");
+  }
 }
 
 function completeReminder(id) {
@@ -985,6 +1139,7 @@ function bindEvents() {
     const completeId = event.target.closest("[data-complete]")?.dataset.complete;
     const qrId = event.target.closest("[data-qr]")?.dataset.qr;
     const notifyId = event.target.closest("[data-notify]")?.dataset.notify;
+    const resetUserId = event.target.closest("[data-reset-user]")?.dataset.resetUser;
     const config = moduleConfig[currentView];
     if (editId) {
       const record = appState[config.collection].find((item) => item.id === editId);
@@ -994,6 +1149,7 @@ function bindEvents() {
     if (completeId) completeReminder(completeId);
     if (qrId) openEquipmentQr(qrId);
     if (notifyId) notifyReminder(notifyId);
+    if (resetUserId) resetUserPassword(resetUserId);
   });
 }
 

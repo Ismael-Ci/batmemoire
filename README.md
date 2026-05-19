@@ -10,6 +10,8 @@ Premiere version du carnet numerique du batiment pour le marche ivoirien. Le pro
 - `manifest.webmanifest` et `service-worker.js` : base PWA transformable en application.
 - `server.js` : serveur Node.js avec authentification, donnees, upload, QR codes et notifications.
 - `/qr/equipment/:id` : page imprimable pour les QR codes equipements.
+- `Bibliotheque` : base de references materiaux/equipements avec marques, references, durees de vie et maintenances.
+- `Utilisateurs` : gestion admin des roles, invitations et resets de mots de passe temporaires.
 - `data/app-data.json` : cree automatiquement au premier lancement.
 - `uploads/` : fichiers documents envoyes par les utilisateurs.
 - `.env.example` : variables de production et notifications.
@@ -27,6 +29,15 @@ Premiere version du carnet numerique du batiment pour le marche ivoirien. Le pro
 - Documents.
 - Rappels.
 - Notifications.
+- Bibliotheque materiaux/equipements.
+- Utilisateurs et roles.
+
+## Roles inclus
+
+- `admin` : gestion complete, utilisateurs, donnees et documents.
+- `gestionnaire` : usage metier complet hors administration utilisateurs.
+- `technicien` : usage terrain pour equipements, documents et rappels.
+- `lecteur` : consultation seule.
 
 ## Compte demo
 
