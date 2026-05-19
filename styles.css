@@ -715,6 +715,15 @@ button {
   color: var(--navy);
 }
 
+a.main-cell {
+  color: var(--teal);
+  text-decoration: none;
+}
+
+a.main-cell:hover {
+  text-decoration: underline;
+}
+
 .subtext {
   display: block;
   margin-top: 2px;

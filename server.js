@@ -39,7 +39,6 @@ const upload = multer({
 
 app.use(express.json({ limit: "12mb" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
 
 function seedState() {
   return {
@@ -254,10 +253,61 @@ app.post("/api/upload", requireAuth, upload.single("document"), (req, res) => {
 
 app.use("/uploads", requireAuth, express.static(UPLOAD_DIR));
 
+app.get("/qr/equipment/:id", requireAuth, async (req, res) => {
+  const item = req.account.state.equipment.find((equipment) => equipment.id === req.params.id);
+  if (!item) return res.status(404).send("Équipement introuvable");
+  const building = req.account.state.buildings.find((entry) => entry.id === item.buildingId);
+  const zone = req.account.state.zones.find((entry) => entry.id === item.zoneId);
+  const targetUrl = `${PUBLIC_URL}/?equipment=${encodeURIComponent(item.id)}`;
+  const qrDataUrl = await QRCode.toDataURL(targetUrl, {
+    margin: 2,
+    width: 320,
+    color: { dark: "#113247", light: "#ffffff" },
+  });
+  res.send(`<!doctype html>
+    <html lang="fr">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>QR - ${escapeHtml(item.name)}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 28px; color: #113247; background: #f5f8fa; }
+          main { max-width: 620px; margin: auto; background: #fff; border: 1px solid #d9e2e8; border-radius: 8px; padding: 24px; }
+          h1 { margin: 0 0 6px; font-size: 26px; }
+          p { margin: 6px 0; color: #60717d; }
+          img { width: 260px; height: 260px; display: block; margin: 24px auto; }
+          dl { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; }
+          dt { font-weight: 700; }
+          dd { margin: 0; }
+          button { background: #168a7a; color: #fff; border: 0; border-radius: 7px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+          @media print { button { display: none; } body { background: #fff; } main { border: 0; } }
+        </style>
+      </head>
+      <body>
+        <main>
+          <h1>${escapeHtml(item.name)}</h1>
+          <p>QR code équipement - BatiMemoire CI</p>
+          <img src="${qrDataUrl}" alt="QR code équipement" />
+          <dl>
+            <dt>Bâtiment</dt><dd>${escapeHtml(building?.name || "-")}</dd>
+            <dt>Zone</dt><dd>${escapeHtml(zone?.name || "-")}</dd>
+            <dt>Type</dt><dd>${escapeHtml(item.type || "-")}</dd>
+            <dt>Marque</dt><dd>${escapeHtml(item.brand || "-")}</dd>
+            <dt>Modèle</dt><dd>${escapeHtml(item.model || "-")}</dd>
+            <dt>Série</dt><dd>${escapeHtml(item.serial || "-")}</dd>
+            <dt>Maintenance</dt><dd>${escapeHtml(item.nextMaintenance || "-")}</dd>
+          </dl>
+          <p>Scanner ce code ouvre la fiche équipement dans l'application connectée.</p>
+          <button onclick="window.print()">Imprimer l'étiquette QR</button>
+        </main>
+      </body>
+    </html>`);
+});
+
 app.get("/api/qr/equipment/:id.svg", requireAuth, async (req, res) => {
   const item = req.account.state.equipment.find((equipment) => equipment.id === req.params.id);
   if (!item) return res.status(404).send("Équipement introuvable");
-  const url = `${PUBLIC_URL}/index.html?equipment=${encodeURIComponent(item.id)}`;
+  const url = `${PUBLIC_URL}/?equipment=${encodeURIComponent(item.id)}`;
   const svg = await QRCode.toString(url, {
     type: "svg",
     margin: 2,
@@ -298,6 +348,15 @@ function notificationMode() {
   const whatsapp = Boolean(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
   if (email || sms || whatsapp) return "providers-configured";
   return "simulation-env-not-configured";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 async function sendNotification(notification, recipients, user) {
@@ -363,6 +422,12 @@ async function sendWhatsApp(notification, to) {
   });
   return { channel: "whatsapp", status: response.ok ? "sent" : "failed", to };
 }
+
+const PUBLIC_FILES = new Set(["/app.js", "/styles.css", "/icon.svg", "/manifest.webmanifest", "/service-worker.js"]);
+
+app.get([...PUBLIC_FILES], (req, res) => {
+  res.sendFile(path.join(__dirname, req.path));
+});
 
 app.get("*", (_req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));

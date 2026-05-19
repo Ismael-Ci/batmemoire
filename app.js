@@ -8,6 +8,7 @@ const stateTemplate = {
   equipment: [],
   documents: [],
   reminders: [],
+  notifications: [],
 };
 
 const moduleConfig = {
@@ -177,6 +178,20 @@ const moduleConfig = {
       { name: "notes", label: "Notes", type: "textarea", full: true },
     ],
   },
+  notifications: {
+    label: "Notifications",
+    singular: "notification",
+    collection: "notifications",
+    idPrefix: "notif",
+    columns: [
+      { key: "title", label: "Notification", main: true, sub: "message" },
+      { key: "channels", label: "Canaux" },
+      { key: "status", label: "Statut", badge: true },
+      { key: "providerMode", label: "Mode" },
+      { key: "createdAt", label: "Date", date: true },
+    ],
+    fields: [],
+  },
 };
 
 let appState = loadState();
@@ -345,6 +360,7 @@ async function hydrateFromServer() {
   } catch {
     serverMode = false;
     document.body.classList.remove("auth-required");
+    handleEquipmentDeepLink();
     return;
   }
 
@@ -372,6 +388,21 @@ function showAppSession() {
   dom.userChip.hidden = false;
   dom.userCompany.textContent = currentUser?.company || "Entreprise";
   dom.userName.textContent = currentUser?.name || currentUser?.email || "Utilisateur";
+  window.setTimeout(handleEquipmentDeepLink, 100);
+}
+
+function handleEquipmentDeepLink() {
+  const equipmentId = new URLSearchParams(window.location.search).get("equipment");
+  if (!equipmentId) return;
+  const record = appState.equipment.find((item) => item.id === equipmentId);
+  if (!record) {
+    showToast("Équipement introuvable pour ce QR code.");
+    return;
+  }
+  dom.buildingFilter.value = record.buildingId || "all";
+  setView("equipment");
+  openDialog("equipment", record);
+  showToast(`Fiche ouverte : ${record.name}`);
 }
 
 function uid(prefix) {
@@ -400,7 +431,7 @@ function slug(value) {
 
 function formatDate(value) {
   if (!value) return "-";
-  const date = new Date(`${value}T00:00:00`);
+  const date = String(value).includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(date);
 }
@@ -608,6 +639,7 @@ function renderModule(moduleKey) {
   dom.moduleEyebrow.textContent = "Module MVP";
   dom.moduleTitle.textContent = config.label;
   dom.addRecord.textContent = `Ajouter ${config.singular}`;
+  dom.addRecord.hidden = !config.fields.length;
   dom.tableHead.innerHTML = `<tr>${config.columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}<th>Actions</th></tr>`;
   dom.tableBody.innerHTML = records.length
     ? records.map((record) => renderRow(moduleKey, record)).join("")
@@ -640,16 +672,21 @@ function renderModuleSummary(moduleKey, records) {
 function renderRow(moduleKey, record) {
   const config = moduleConfig[moduleKey];
   const cells = config.columns.map((column) => `<td>${renderCell(record, column)}</td>`).join("");
-  return `
-    <tr>
-      ${cells}
-      <td>
-        <div class="row-actions">
+  const actions = config.fields.length
+    ? `
           ${moduleKey === "equipment" ? `<button type="button" data-qr="${record.id}">QR</button>` : ""}
           ${moduleKey === "reminders" ? `<button type="button" data-notify="${record.id}">Notifier</button>` : ""}
           ${moduleKey === "reminders" && record.status !== "Fait" ? `<button type="button" data-complete="${record.id}">Fait</button>` : ""}
           <button type="button" data-edit="${record.id}">Modifier</button>
           <button type="button" data-delete="${record.id}">Supprimer</button>
+      `
+    : `<span class="subtext">Lecture seule</span>`;
+  return `
+    <tr>
+      ${cells}
+      <td>
+        <div class="row-actions">
+          ${actions}
         </div>
       </td>
     </tr>
@@ -661,6 +698,7 @@ function renderCell(record, column) {
   if (column.relation === "building") value = buildingName(value);
   if (column.relation === "zone") value = zoneName(value);
   if (column.date) value = formatDate(value);
+  if (Array.isArray(value)) value = value.join(", ");
   if (column.badge) return statusBadge(value);
   if (column.main) {
     const sub = column.sub ? record[column.sub] : "";
@@ -674,6 +712,7 @@ function renderCell(record, column) {
 
 function openDialog(moduleKey, record = null) {
   const config = moduleConfig[moduleKey];
+  if (!config.fields.length) return;
   currentEdit = { moduleKey, id: record?.id || null };
   dom.dialogEyebrow.textContent = config.label;
   dom.dialogTitle.textContent = record ? `Modifier ${config.singular}` : `Ajouter ${config.singular}`;
@@ -816,7 +855,7 @@ function openEquipmentQr(id) {
     showToast("Le QR code nécessite le serveur web connecté.");
     return;
   }
-  window.open(`${API_BASE}/qr/equipment/${encodeURIComponent(id)}.svg`, "_blank", "noopener");
+  window.open(`/qr/equipment/${encodeURIComponent(id)}`, "_blank", "noopener");
 }
 
 async function notifyReminder(id) {
@@ -833,6 +872,7 @@ async function notifyReminder(id) {
     appState.notifications.unshift(result.notification);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
     showToast("Notification préparée. Configure SMTP/Twilio/WhatsApp pour l’envoi réel.");
+    if (currentView === "notifications") setView("notifications");
   } catch (error) {
     showToast(error.message || "Notification impossible.");
   }
