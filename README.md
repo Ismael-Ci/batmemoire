@@ -19,10 +19,12 @@ Premiere version du carnet numerique du batiment pour le marche ivoirien. Le pro
 - `docs/cahier_des_charges_mvp.md` : cahier des charges editable.
 - `docs/Cahier_des_charges_MVP_BatiMemoire_CI.pdf` : cahier des charges PDF.
 - `docs/deploiement_ignara_xyz.md` : guide pour connecter le domaine `ignara.xyz`.
+- `docs/buildtrack_pro_plan_developpement.md` : alignement avec la strategie BuildTrack Pro, phases et outils.
 
 ## Modules inclus
 
 - Tableau de bord.
+- Score sante batiment.
 - Batiments.
 - Zones.
 - Materiaux.

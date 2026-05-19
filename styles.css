@@ -446,6 +446,31 @@ button {
   font-weight: 700;
 }
 
+.metric[class*="health-"] {
+  border-color: rgba(22, 138, 122, 0.35);
+  background: linear-gradient(135deg, #ffffff 0%, #eef8f6 100%);
+}
+
+.metric.health-good strong,
+.metric.health-good small {
+  color: #168a7a;
+}
+
+.metric.health-ok strong,
+.metric.health-ok small {
+  color: #2877b9;
+}
+
+.metric.health-watch strong,
+.metric.health-watch small {
+  color: #b56a00;
+}
+
+.metric.health-risk strong,
+.metric.health-risk small {
+  color: #b42318;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);

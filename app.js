@@ -617,8 +617,10 @@ function renderDashboard() {
   const reminders = scopedRecords("reminders");
   const overdue = reminders.filter((item) => item.status !== "Fait" && daysUntil(item.dueDate) < 0).length;
   const soon = reminders.filter((item) => item.status !== "Fait" && daysUntil(item.dueDate) >= 0 && daysUntil(item.dueDate) <= 30).length;
+  const health = calculateBuildingHealth(scope ? active?.id : null);
 
   dom.metricGrid.innerHTML = [
+    metric("Score santÃ©", `${health.score}%`, health.label, `health-${health.level}`),
     metric("Bâtiments", scope ? 1 : appState.buildings.length, "Portefeuille"),
     metric("Zones", count("zones"), "Localisation"),
     metric("Matériaux", count("materials"), "Références"),
@@ -634,8 +636,27 @@ function renderDashboard() {
   renderWarrantyList([...scopedRecords("materials"), ...scopedRecords("equipment")]);
 }
 
-function metric(label, value, note) {
-  return `<article class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`;
+function calculateBuildingHealth(buildingId = null) {
+  const filter = (records) => (buildingId ? records.filter((item) => item.buildingId === buildingId) : records);
+  const reminders = filter(appState.reminders).filter((item) => item.status !== "Fait");
+  const equipment = filter(appState.equipment);
+  const materials = filter(appState.materials);
+  const overdue = reminders.filter((item) => daysUntil(item.dueDate) < 0).length;
+  const critical = reminders.filter((item) => item.priority === "Critique").length;
+  const soon = reminders.filter((item) => daysUntil(item.dueDate) >= 0 && daysUntil(item.dueDate) <= 30).length;
+  const broken = equipment.filter((item) => ["En panne", "Ã€ surveiller"].includes(item.status)).length;
+  const replace = materials.filter((item) => ["Ã€ remplacer", "Ã€ surveiller"].includes(item.status)).length;
+  const expiredWarranty = [...equipment, ...materials].filter((item) => item.warrantyEnd && daysUntil(item.warrantyEnd) < 0).length;
+  const penalty = overdue * 14 + critical * 10 + soon * 4 + broken * 8 + replace * 6 + expiredWarranty * 3;
+  const score = Math.max(0, Math.min(100, 100 - penalty));
+  if (score >= 85) return { score, label: "Excellent", level: "good" };
+  if (score >= 70) return { score, label: "Stable", level: "ok" };
+  if (score >= 50) return { score, label: "Ã€ surveiller", level: "watch" };
+  return { score, label: "Critique", level: "risk" };
+}
+
+function metric(label, value, note, className = "") {
+  return `<article class="metric ${escapeHtml(className)}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`;
 }
 
 function renderBuildingMap(building) {
