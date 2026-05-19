@@ -109,17 +109,18 @@ Variables d'environnement :
 NODE_ENV=production
 PUBLIC_URL=https://ignara.xyz
 PORT=10000
+STORAGE_ROOT=/opt/render/project/src/storage
 ```
 
 Disque persistant :
 
 ```text
 Name : batimemoire-data
-Mount path : /opt/render/project/src/data
+Mount path : /opt/render/project/src/storage
 Size : 1 GB
 ```
 
-Important : la version actuelle stocke les documents dans `uploads/`. Pour une vraie production, il faudra remplacer `uploads/` par un stockage cloud. Pour une démonstration, les données principales sont conservées dans `data/app-data.json`.
+Important : la version actuelle stocke les données dans `storage/data/` et les documents dans `storage/uploads/` quand `STORAGE_ROOT` est configuré. Pour une commercialisation avancée, on remplacera ensuite les fichiers locaux par S3, Cloudflare R2 ou Supabase Storage.
 
 ## 5. Configuration DNS Namecheap
 
@@ -151,7 +152,7 @@ Pour le domaine racine `ignara.xyz`, Render peut donner un `A Record` ou une con
 ```text
 Type : A Record
 Host : @
-Value : IP_DONNEE_PAR_RENDER
+Value : 216.24.57.1
 TTL : Automatic
 ```
 

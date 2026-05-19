@@ -10,8 +10,9 @@ const QRCode = require("qrcode");
 const app = express();
 const PORT = Number(process.env.PORT || 4200);
 const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
-const DATA_DIR = path.join(__dirname, "data");
-const UPLOAD_DIR = path.join(__dirname, "uploads");
+const STORAGE_ROOT = process.env.STORAGE_ROOT || __dirname;
+const DATA_DIR = path.join(STORAGE_ROOT, "data");
+const UPLOAD_DIR = path.join(STORAGE_ROOT, "uploads");
 const DB_FILE = path.join(DATA_DIR, "app-data.json");
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
 

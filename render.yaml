@@ -12,7 +12,9 @@ services:
         value: https://ignara.xyz
       - key: PORT
         value: 10000
+      - key: STORAGE_ROOT
+        value: /opt/render/project/src/storage
     disk:
       name: batimemoire-data
-      mountPath: /opt/render/project/src/data
+      mountPath: /opt/render/project/src/storage
       sizeGB: 1
