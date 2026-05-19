@@ -5,6 +5,7 @@ const path = require("path");
 const express = require("express");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
+const { Pool } = require("pg");
 const QRCode = require("qrcode");
 
 const app = express();
@@ -14,7 +15,16 @@ const STORAGE_ROOT = process.env.STORAGE_ROOT || __dirname;
 const DATA_DIR = path.join(STORAGE_ROOT, "data");
 const UPLOAD_DIR = path.join(STORAGE_ROOT, "uploads");
 const DB_FILE = path.join(DATA_DIR, "app-data.json");
+const DATABASE_URL = process.env.DATABASE_URL || "";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
+const pool = DATABASE_URL
+  ? new Pool({
+      connectionString: DATABASE_URL,
+      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+    })
+  : null;
+let runtimeDb = null;
+let storeMode = "json";
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -177,15 +187,84 @@ function defaultDb() {
   };
 }
 
-function readDb() {
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function readJsonDb() {
   if (!fs.existsSync(DB_FILE)) {
-    writeDb(defaultDb());
+    writeJsonDb(defaultDb());
   }
   return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
 }
 
-function writeDb(db) {
+function writeJsonDb(db) {
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+}
+
+async function initPostgresStore() {
+  if (!pool) return null;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS app_store (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+  const result = await pool.query("SELECT data FROM app_store WHERE id = $1", ["main"]);
+  if (result.rows[0]?.data) {
+    return result.rows[0].data;
+  }
+  const initialDb = readJsonDb();
+  await writePostgresDb(initialDb);
+  return initialDb;
+}
+
+async function writePostgresDb(db) {
+  if (!pool) return;
+  await pool.query(
+    `
+      INSERT INTO app_store (id, data, updated_at)
+      VALUES ($1, $2::jsonb, now())
+      ON CONFLICT (id)
+      DO UPDATE SET data = EXCLUDED.data, updated_at = now()
+    `,
+    ["main", JSON.stringify(db)]
+  );
+}
+
+async function initStore() {
+  const jsonDb = readJsonDb();
+  if (!pool) {
+    runtimeDb = jsonDb;
+    storeMode = "json";
+    return;
+  }
+  try {
+    runtimeDb = await initPostgresStore();
+    writeJsonDb(runtimeDb);
+    storeMode = "postgresql";
+  } catch (error) {
+    runtimeDb = jsonDb;
+    storeMode = "json-fallback";
+    console.error("PostgreSQL indisponible, fallback JSON active:", error.message);
+  }
+}
+
+function readDb() {
+  if (!runtimeDb) runtimeDb = readJsonDb();
+  return clone(runtimeDb);
+}
+
+function writeDb(db) {
+  runtimeDb = clone(db);
+  writeJsonDb(runtimeDb);
+  if (pool && storeMode === "postgresql") {
+    writePostgresDb(runtimeDb).catch((error) => {
+      storeMode = "json-fallback";
+      console.error("Sauvegarde PostgreSQL impossible, fallback JSON active:", error.message);
+    });
+  }
 }
 
 function parseCookies(req) {
@@ -255,7 +334,7 @@ function temporaryPassword() {
 }
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, publicUrl: PUBLIC_URL });
+  res.json({ ok: true, publicUrl: PUBLIC_URL, storage: storeMode });
 });
 
 app.post("/api/auth/login", (req, res) => {
@@ -578,7 +657,15 @@ app.get("*", (_req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`BatiMemoire CI disponible sur ${PUBLIC_URL}`);
-  console.log("Compte demo : admin@ignara.xyz / Admin123!");
-});
+initStore()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`BatiMemoire CI disponible sur ${PUBLIC_URL}`);
+      console.log(`Stockage actif : ${storeMode}`);
+      console.log("Compte demo : admin@ignara.xyz / Admin123!");
+    });
+  })
+  .catch((error) => {
+    console.error("Demarrage impossible:", error);
+    process.exit(1);
+  });

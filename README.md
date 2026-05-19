@@ -9,6 +9,7 @@ Premiere version du carnet numerique du batiment pour le marche ivoirien. Le pro
 - `app.js` : logique metier, donnees de demo, localStorage, import/export JSON.
 - `manifest.webmanifest` et `service-worker.js` : base PWA transformable en application.
 - `server.js` : serveur Node.js avec authentification, donnees, upload, QR codes et notifications.
+- `DATABASE_URL` : active PostgreSQL automatiquement si une base Render PostgreSQL est connectee.
 - `/qr/equipment/:id` : page imprimable pour les QR codes equipements.
 - `Bibliotheque` : base de references materiaux/equipements avec marques, references, durees de vie et maintenances.
 - `Utilisateurs` : gestion admin des roles, invitations et resets de mots de passe temporaires.
@@ -61,11 +62,37 @@ Puis ouvrir :
 http://localhost:4200
 ```
 
+## Stockage donnees
+
+Par defaut, l'application sauvegarde dans `data/app-data.json`. C'est pratique pour tester et pour demarrer rapidement.
+
+Pour passer en vraie base cloud sur Render :
+
+1. Dans Render, creer une base `PostgreSQL`.
+2. Copier la valeur `Internal Database URL`.
+3. Dans le service web `batmemoire-1`, aller dans `Environment`.
+4. Ajouter cette variable :
+
+```text
+DATABASE_URL=<Internal Database URL de Render PostgreSQL>
+```
+
+5. Garder aussi :
+
+```text
+NODE_ENV=production
+PUBLIC_URL=https://batmemoire-1.onrender.com
+STORAGE_ROOT=/opt/render/project/src/storage
+```
+
+6. Lancer `Manual Deploy -> Clear build cache & deploy`.
+
+Si PostgreSQL est indisponible, le serveur garde un fallback JSON pour eviter de bloquer le site.
+
 ## Evolution recommandee
 
-1. Remplacer le fichier JSON serveur par PostgreSQL.
+1. Creer la base PostgreSQL Render et renseigner `DATABASE_URL`.
 2. Remplacer le stockage local `uploads/` par S3, Cloudflare R2 ou Supabase Storage.
-3. Ajouter gestion complete des roles utilisateurs.
-4. Brancher SMTP, SMS et WhatsApp Business.
-5. Ajouter notifications automatiques planifiees.
-6. Transformer la PWA en application mobile avec Capacitor.
+3. Ajouter notifications automatiques planifiees.
+4. Ajouter historique/audit des modifications.
+5. Transformer la PWA en application mobile avec Capacitor.

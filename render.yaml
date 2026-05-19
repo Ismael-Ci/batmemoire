@@ -12,6 +12,8 @@ services:
         value: https://ignara.xyz
       - key: STORAGE_ROOT
         value: /opt/render/project/src/storage
+      - key: DATABASE_URL
+        sync: false
     disk:
       name: batimemoire-data
       mountPath: /opt/render/project/src/storage
