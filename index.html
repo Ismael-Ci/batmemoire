@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#113247" />
+    <title>BatiMemoire CI - MVP</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <section id="loginScreen" class="login-screen" hidden>
+      <div class="login-card">
+        <div class="brand login-brand">
+          <div class="brand-mark" aria-hidden="true">BM</div>
+          <div>
+            <strong>BatiMemoire CI</strong>
+            <span>Connexion au site</span>
+          </div>
+        </div>
+        <h1>Accès entreprise</h1>
+        <p>Connecte-toi pour utiliser le carnet numérique depuis ordinateur ou téléphone.</p>
+        <form id="loginForm" class="login-form">
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" value="admin@ignara.xyz" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span>Mot de passe</span>
+            <input name="password" type="password" value="Admin123!" autocomplete="current-password" required />
+          </label>
+          <button class="primary-button" type="submit">Se connecter</button>
+          <small id="loginMessage">Compte demo : admin@ignara.xyz / Admin123!</small>
+        </form>
+      </div>
+    </section>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigation principale">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">BM</div>
+          <div>
+            <strong>BatiMemoire CI</strong>
+            <span>Carnet bâtiment</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" type="button" data-view="dashboard" data-testid="nav-dashboard">
+            <span class="nav-icon" aria-hidden="true">T</span>
+            <span>Tableau de bord</span>
+          </button>
+          <button class="nav-item" type="button" data-view="buildings" data-testid="nav-buildings">
+            <span class="nav-icon" aria-hidden="true">B</span>
+            <span>Bâtiments</span>
+          </button>
+          <button class="nav-item" type="button" data-view="zones" data-testid="nav-zones">
+            <span class="nav-icon" aria-hidden="true">Z</span>
+            <span>Zones</span>
+          </button>
+          <button class="nav-item" type="button" data-view="materials" data-testid="nav-materials">
+            <span class="nav-icon" aria-hidden="true">M</span>
+            <span>Matériaux</span>
+          </button>
+          <button class="nav-item" type="button" data-view="equipment" data-testid="nav-equipment">
+            <span class="nav-icon" aria-hidden="true">E</span>
+            <span>Équipements</span>
+          </button>
+          <button class="nav-item" type="button" data-view="documents" data-testid="nav-documents">
+            <span class="nav-icon" aria-hidden="true">D</span>
+            <span>Documents</span>
+          </button>
+          <button class="nav-item" type="button" data-view="reminders" data-testid="nav-reminders">
+            <span class="nav-icon" aria-hidden="true">R</span>
+            <span>Rappels</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <span class="panel-label">Version</span>
+          <strong>MVP PWA</strong>
+          <small>Stockage local, export JSON, prêt pour backend.</small>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title-block">
+            <span class="eyebrow">Espace entreprise</span>
+            <h1 id="viewTitle">Tableau de bord</h1>
+          </div>
+
+          <div class="top-actions">
+            <div class="user-chip" id="userChip" hidden>
+              <span id="userCompany">-</span>
+              <strong id="userName">-</strong>
+              <button class="link-button" type="button" id="logoutButton">Déconnexion</button>
+            </div>
+            <label class="field compact-field">
+              <span>Bâtiment actif</span>
+              <select id="buildingFilter" data-testid="building-filter"></select>
+            </label>
+            <label class="field search-field">
+              <span>Recherche</span>
+              <input id="globalSearch" type="search" placeholder="Nom, fournisseur, statut..." data-testid="global-search" />
+            </label>
+            <button class="tool-button" type="button" id="exportJson" title="Exporter les données">
+              <span aria-hidden="true">↓</span>
+              Export
+            </button>
+            <label class="tool-button file-tool" title="Importer les données">
+              <span aria-hidden="true">↑</span>
+              Import
+              <input id="importJson" type="file" accept="application/json" />
+            </label>
+          </div>
+        </header>
+
+        <section id="dashboardView" class="view is-active" data-testid="dashboard-view">
+          <div id="metricGrid" class="metric-grid"></div>
+
+          <div class="dashboard-grid">
+            <section class="surface span-7">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">Bâtiment sélectionné</span>
+                  <h2 id="activeBuildingName">-</h2>
+                </div>
+                <button class="secondary-button" type="button" data-view-jump="zones">Voir zones</button>
+              </div>
+              <div class="building-map" id="buildingMap" aria-label="Carte simplifiée du bâtiment"></div>
+            </section>
+
+            <section class="surface span-5">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">Maintenance</span>
+                  <h2>Rappels prioritaires</h2>
+                </div>
+                <button class="primary-button small" type="button" data-quick-add="reminders">Ajouter</button>
+              </div>
+              <div id="priorityReminders" class="stack-list"></div>
+            </section>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="surface span-6">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">Répartition</span>
+                  <h2>Matériaux par catégorie</h2>
+                </div>
+              </div>
+              <div id="materialBars" class="bars"></div>
+            </section>
+
+            <section class="surface span-6">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">Garanties</span>
+                  <h2>Échéances à surveiller</h2>
+                </div>
+              </div>
+              <div id="warrantyList" class="stack-list compact"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="moduleView" class="view" data-testid="module-view">
+          <div class="module-toolbar">
+            <div>
+              <span class="eyebrow" id="moduleEyebrow">Module</span>
+              <h2 id="moduleTitle">Bâtiments</h2>
+            </div>
+            <div class="module-actions">
+              <button class="secondary-button" type="button" id="printReport">Imprimer</button>
+              <button class="secondary-button" type="button" id="resetDemo">Réinitialiser</button>
+              <button class="primary-button" type="button" id="addRecord" data-testid="add-record">Ajouter</button>
+            </div>
+          </div>
+
+          <div id="moduleSummary" class="summary-strip"></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="recordDialog" class="record-dialog" data-testid="record-dialog">
+      <form id="recordForm" class="record-form">
+        <div class="dialog-head">
+          <div>
+            <span class="eyebrow" id="dialogEyebrow">Fiche</span>
+            <h2 id="dialogTitle">Ajouter</h2>
+          </div>
+          <button class="icon-button" value="cancel" type="button" id="closeDialog" aria-label="Fermer">×</button>
+        </div>
+        <div id="formFields" class="form-grid"></div>
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" id="cancelDialog">Annuler</button>
+          <button class="primary-button" type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

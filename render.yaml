@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: batimemoire
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_URL
+        value: https://ignara.xyz
+      - key: PORT
+        value: 10000
+      - key: STORAGE_ROOT
+        value: /opt/render/project/src/storage
+    disk:
+      name: batimemoire-data
+      mountPath: /opt/render/project/src/storage
+      sizeGB: 1
