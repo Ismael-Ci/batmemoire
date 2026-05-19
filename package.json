@@ -1,0 +1,18 @@
+{
+  "name": "batimemoire-ci",
+  "version": "0.2.0",
+  "private": true,
+  "description": "BatiMemoire CI - site web full-stack avec comptes, documents, QR codes et notifications.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check app.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "qrcode": "^1.5.4"
+  }
+}
